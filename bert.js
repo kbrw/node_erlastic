@@ -1,6 +1,6 @@
 // BERT-NODE
-// Inspired by bert.js of 2009 Rusty Klophaus (@rklophaus)
-// Rewrite to 
+// Arnaud Wetzel, Inspired by bert.js of 2009 Rusty Klophaus (@rklophaus)
+// Rewrite it to 
 // - code and decode from node-js Buffer objects
 // - handle erlang 17 maps
 // - binary type is Buffer
@@ -25,6 +25,13 @@ function BertClass() {
 	this.MAP = 116;
 	this.NEW_FLOAT = 70;
 	this.ZERO = 0;
+
+    this.ELIXIR = 0;
+    this.ERLANG = 1;
+
+    this.all_binaries_as_string = false;
+    this.map_key_as_atom = true;
+    this.convention = this.ELIXIR;
 }
 
 function BertAtom(Obj) {
@@ -97,11 +104,14 @@ BertClass.prototype.encode_inner = function (Obj, buffer) {
 };
 
 BertClass.prototype.encode_string = function (Obj, buffer) {
-    return this.encode_binary(new Buffer(Obj), buffer); // Elixir Style string as binary
-	// buffer[0] = this.STRING; // Erlang Style string as list
-    // buffer.writeUInt16BE(Obj.length,1);
-    // var len = buffer.write(Obj,3);
-    // return buffer.slice(3+len);
+    if (this.convention === this.ELIXIR){
+        return this.encode_binary(new Buffer(Obj), buffer);
+    } else {
+	    buffer[0] = this.STRING;
+        buffer.writeUInt16BE(Obj.length,1);
+        var len = buffer.write(Obj,3);
+        return buffer.slice(3+len);
+    }
 };
 
 BertClass.prototype.encode_boolean = function (Obj, buffer) {
@@ -172,7 +182,8 @@ BertClass.prototype.encode_float = function (Obj, buffer) {
 BertClass.prototype.encode_object = function (Obj, buffer) {
 	// Check if it's an atom, binary, or tuple...
 	if (Obj === null || Obj === undefined){
-	    return this.encode_inner(this.atom("nil"),buffer);
+        var undefined_atom = (this.convention === this.ELIXIR) ? "nil" : "undefined";
+	    return this.encode_inner(this.atom(undefined),buffer);
 	}
 	if (Obj instanceof Buffer) {
 		return this.encode_binary(Obj,buffer);
@@ -244,7 +255,8 @@ BertClass.prototype.encode_map = function (Obj, buffer) {
     buffer = buffer.slice(5);
     var i;
 	for (i = 0; i < keys.length; i++) {
-        buffer = this.encode_inner(this.atom(keys[i]),buffer);
+        key = (this.map_key_as_atom) ? this.atom(keys[i]) : keys[i];
+        buffer = this.encode_inner(key,buffer);
         buffer = this.encode_inner(Obj[keys[i]],buffer);
 	}
 	return buffer;
@@ -304,7 +316,10 @@ BertClass.prototype.decode_atom = function (buffer, Count) {
 	else if (Value === "false") {
 		Value = false;
 	}
-	else if (Value === "nil") {
+	else if (this.convention === this.ELIXIR && Value === "nil") {
+		Value = undefined;
+	}
+	else if (this.convention === this.ERLANG && Value === "undefined") {
 		Value = undefined;
 	}
 	return {
@@ -319,7 +334,7 @@ BertClass.prototype.decode_binary = function (buffer) {
     var bin = new Buffer(Size);
     buffer.copy(bin,0,0,Size);
 	return {
-		value: bin,
+        value: (this.convention === this.ELIXIR && this.all_binaries_as_string) ? bin.toString() : bin,
 		rest:  buffer.slice(Size)
 	};
 };

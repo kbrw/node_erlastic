@@ -28,7 +28,7 @@ defmodule PortTest do
   use ExUnit.Case, async: true
 
   setup_all do
-    GenServer.start_link(Exos.Proc,{"node ./test.js",[],cd: __DIR__}, name: Echo)
+    GenServer.start_link(Exos.Proc,{"node ./test/test.js",[],cd: "#{__DIR__}/.."}, name: Echo)
     :ok
   end
   
