@@ -1,7 +1,7 @@
 {
   "name": "node_erlastic",
   "version": "0.0.1",
-  "description": "Interface to make node-erlang communication",
+  "description": "Interface to make node-erlang communication, integrate a nodejs gen_server into your erlang application",
   "main": "main.js",
   "scripts": {
     "test": "elixir test/test.exs"
