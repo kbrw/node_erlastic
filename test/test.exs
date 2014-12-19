@@ -3,7 +3,7 @@ defmodule Exos.Proc do
 
   def init({cmd,init,opts}) do
     port = Port.open({:spawn,'#{cmd}'}, [:binary,:exit_status, packet: 4] ++ opts)
-    #send(port,{self,{:command,:erlang.term_to_binary(init)}})
+    send(port,{self,{:command,:erlang.term_to_binary(init)}})
     {:ok,port}
   end
 

@@ -1,4 +1,3 @@
-var port = require('./../main.js').port;
-port.on('in',function(term){
-    port.emit('out',term);
+require('./../main.js').server(function(term,state){
+  return ["reply",term,state];
 });
