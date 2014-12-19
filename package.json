@@ -1,0 +1,29 @@
+{
+  "name": "node_erlastic",
+  "version": "0.0.1",
+  "description": "Interface to make node-erlang communication",
+  "main": "main.js",
+  "scripts": {
+    "test": "elixir test/test.exs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awetzel/node_erlastic"
+  },
+  "keywords": [
+    "erlang",
+    "bert",
+    "encoding",
+    "decoding",
+    "elixir",
+    "port",
+    "interface",
+    "binding"
+  ],
+  "author": "Arnaud Wetzel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/awetzel/node_erlastic/issues"
+  },
+  "homepage": "https://github.com/awetzel/node_erlastic"
+}
