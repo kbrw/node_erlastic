@@ -317,10 +317,10 @@ BertClass.prototype.decode_atom = function (buffer, Count) {
 		Value = false;
 	}
 	else if (this.convention === this.ELIXIR && Value === "nil") {
-		Value = undefined;
+		Value = null;
 	}
 	else if (this.convention === this.ERLANG && Value === "undefined") {
-		Value = undefined;
+		Value = null;
 	}
 	return {
 		value: this.atom(Value),
