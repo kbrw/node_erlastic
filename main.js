@@ -1,29 +1,35 @@
 var bert = require('./bert.js'),
-    events = require('events'),
-    port = new events.EventEmitter();
-    stdin = process.stdin, 
-    stdout = process.stdout,
+    Duplex = require('stream').Duplex,
+    util = require('util'),
+    stdin = process.stdin, stdout = process.stdout,
     term_len = undefined;
 
-stdin.on('readable', function onreadable() {
+util.inherits(Port, Duplex);
+
+function Port() { Duplex.call(this,{objectMode: true}); }
+var port = new Port();
+
+Port.prototype._read = read_term
+stdin.on('readable', read_term);
+stdin.on('end', process.exit);
+
+function read_term() {
   var term;
   if (term_len === undefined && null !== (term_bin = stdin.read(4))) {
     term_len = bert.bytes_to_int(term_bin,4,true);
   }
-  if (null !== (term = stdin.read(term_len))) {
-    port.emit('in',bert.decode(term));
+  if (term_len !== undefined && null !== (term = stdin.read(term_len))) {
     term_len = undefined;
-    onreadable();
+    port.push(bert.decode(term));
   }
-});
-stdin.on('end', process.exit);
+}
 
-port.on('out', function(obj) {
+Port.prototype._write = function(obj, encoding, callback){
   var term = bert.encode(obj);
   var len = new Buffer(4); len.writeUInt32BE(term.length,0);
   stdout.write(len);
-  stdout.write(term);
-});
+  stdout.write(term,callback);
+}
 
 function log(mes){
   if (typeof(mes) != 'string') mes = JSON.stringify(mes); 
@@ -31,18 +37,17 @@ function log(mes){
 }
 
 function server(handler){
-  state = null;
+  var state = null, lock = false, mailbo;
   port.on('in',function(term){
     if(state === null){
-      state = term; 
+      state = term;
     }else{
-      var res = handler(term,state);
-      if (res[0] === "reply") {
-        port.emit('out',res[1]);
-        state = res[2];
-      }else{
-        state = res[1];
-      }
+      handler(term,function(type,arg1,arg2){
+        if (type === "reply") port.emit('out',arg1);
+        if ((type === "reply" && arg2) || (type === "noreply" && arg1)) {
+          state = (arg2 || arg1)(state)
+        }
+      });
     }
   });
 }

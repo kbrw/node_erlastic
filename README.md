@@ -94,24 +94,26 @@ containing the binary erlang term, converted using the following rules :
   - `nil` atom if `Bert.convention == Bert.ELIXIR`
   - `undefined` atom if `Bert.convention == Bert.ERLANG`
 
-## The Port event handler
+## The Port Duplex
 
-The Port event handler is a javascript interface to communicate
-through standard output and input with and erlang port protocol.
+Port provides you a Node Duplex stream in object mode which is both Readable
+and Writable : http://nodejs.org/api/stream.html#stream_class_stream_duplex_1
+You can communicate javascript object with an erlang through stdin/out with
+`port.read()` and `port.write(obj)`.  These objects are converted to erlang
+external binary format using the Bert encoder described above.
 
 **Need `{packet,4}` `openport` option on the erlang side**
 
-Two events are handled : `out` and `in`, you listen on `in` to get
-decoded binary erlang term from the port, you emit an `out` event
-with a javascript object as parameter to send the encoded binary
-erlang term of this object to the port.
-
-Below a simple "echo" server using this abstraction :
+Below a simple "echo" server using this abstraction, read nodejs
+"readable" documentation to understand it :
 
 ```javascript
 var port = require('node_erlastic').port;
-port.on('in', function(term){
-  port.emit('out',term);
+port.on('readable', function echo(){
+  if(null !== (term = port.read())){
+    port.write(term);
+    echo();
+  }
 });
 ```
 
