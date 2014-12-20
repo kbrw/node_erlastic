@@ -155,3 +155,14 @@ Before sending request, the first message from the port will be
 used to define the initial state.
 
 Please see the beginning of this README to find a complete example.
+
+## Log function
+
+The port stderr is directly output into the erlang stdout, this library
+provides a convenient `log` function allowing you to log something from your
+node server.
+
+```javascript
+  var log = require("node_erlastic").log;
+  log("your log");
+```
