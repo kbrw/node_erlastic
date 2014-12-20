@@ -11,19 +11,20 @@ This module allows you to :
 ## Example Usage
 
 Before going through details, lets take an example, write an account
-manager server :
+manager server, where you can add or remove an amount in the
+account and get it :
 
 ```javascript
-require('node_erlastic').server(function(term,current_amount){
-  if (term == "get") return ["reply",current_amount,current_amount];
-  if (term[0] == "add") return ["noreply",current_amount+term[1]];
-  if (term[0] == "rem") return ["noreply",current_amount-term[1]];
+require('node_erlastic').server(function(term,from,current_amount,done){
+  if (term == "get") return done("reply",current_amount);
+  if (term[0] == "add") return done("noreply",current_amount+term[1]);
+  if (term[0] == "rem") return done("noreply",current_amount-term[1]);
   throw new Error("unexpected request")
 });
 ```
 
 ```elixir
-GenServer.start_link(Exos.Proc,{"node ./calculator.js",0,cd: "/path/to/proj"}, name: Calculator)
+GenServer.start_link(Exos.Proc,{"node calculator.js",0,cd: "/path/to/proj"}, name: Calculator)
 GenServer.cast Calculator, {:add, 2}
 GenServer.cast Calculator, {:add, 3}
 GenServer.cast Calculator, {:rem, 1}
@@ -117,22 +118,40 @@ port.on('readable', function echo(){
 });
 ```
 
+```elixir
+port = Port.open({:spawn,'node calculator.js'}, [:binary, packet: 4])
+send(port,{self,{:command,:erlang.term_to_binary( {:hello, 007} )}})
+{:hello, 007} = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end
+send(port,{self,{:command,:erlang.term_to_binary( [:foo, :bar]} )}})
+{:foo, :bar} = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end
+```
+
 ## The Erlang style handler interface to the port event handler
 
 For convenience, you can use the `server` function to react to the
-port events in the same fashion as the erlang gen server handler
+port events in the same fashion as the erlang gen server handler.
 
-It takes as parameter a handler function taking `(req_term,state)` parameters
-and returning  `["reply",reply_term,new_state]` or `["noreply",new_state].
+It takes as parameter a handler function taking `(req_term,from,state,done)` parameters.
+To "unlock" state and continue to read request mailbox (equivalent of the
+return of the erlang `gen_server handle_*` function), you need to call 
+
+```javascript
+done("noreply",newstate); 
+done("noreply");
+done("reply",reply_term,newstate);
+done("reply",reply_term);
+```
+
+Like in erlang, your handler can unlock the state before it replies
+to the call:
+
+```javascript
+done("noreply",newstate);
+// then in some callback
+from(myreply);
+```
 
 Before sending request, the first message from the port will be
 used to define the initial state.
 
-```javascript
-require('node_erlastic').server(function(term,current_amount){
-  if (term == "get") return ["reply",current_amount,current_amount];
-  if (term[0] == "add") return ["noreply",current_amount+term[1]];
-  if (term[0] == "rem") return ["noreply",current_amount-term[1]];
-  throw new Error("unexpected request")
-});
-```
+Please see the beginning of this README to find a complete example.

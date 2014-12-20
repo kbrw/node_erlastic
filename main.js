@@ -37,17 +37,25 @@ function log(mes){
 }
 
 function server(handler){
-  var state = null, lock = false, mailbo;
-  port.on('in',function(term){
-    if(state === null){
-      state = term;
-    }else{
-      handler(term,function(type,arg1,arg2){
-        if (type === "reply") port.emit('out',arg1);
-        if ((type === "reply" && arg2) || (type === "noreply" && arg1)) {
-          state = (arg2 || arg1)(state)
-        }
-      });
+  var state,state_lock = false;
+  port.on('readable', function next_term(){
+    if(!state_lock && null !== (term = port.read())){
+      state_lock = true;
+      if(state === undefined) {
+        state = term; // first term is initial state
+        state_lock = false;
+        next_term();
+      }
+      else{
+        handler(term,function(term){port.write(term);},state,function(type,arg1,arg2){
+          if (type === "reply") port.write(arg1);
+          if ((type === "reply" && arg2 !== undefined) || (type === "noreply" && arg1 !== undefined)) {
+            state = (arg2 === undefined) ? arg1 : arg2;
+          }
+          state_lock = false;
+          next_term();
+        });
+      }
     }
   });
 }

@@ -28,12 +28,23 @@ defmodule PortTest do
   use ExUnit.Case, async: true
 
   setup_all do
-    GenServer.start_link(Exos.Proc,{"node ./test/test.js",[],cd: "#{__DIR__}/.."}, name: Echo)
+    GenServer.start_link(Exos.Proc,{"node test.js",[],cd: __DIR__}, name: Echo)
+    GenServer.start_link(Exos.Proc,{"node calculator.js",0,cd: __DIR__}, name: Calculator)
     :ok
   end
   
   test "echo server return same term" do
     test = [:foo,"bar",%{hello: "world"},123,3.2,9007199254740992,{:a,:b}]
     assert  test ==  GenServer.call Echo, test
+  end
+  
+  test "calculator must return the good result" do
+    GenServer.cast Calculator, {:add, 1}
+    GenServer.cast Calculator, {:add, 2}
+    GenServer.cast Calculator, {:rem, 3}
+    GenServer.cast Calculator, {:add, 4}
+    GenServer.cast Calculator, {:add, 5}
+    GenServer.cast Calculator, {:rem, 6}
+    assert 3 = GenServer.call(Calculator,:get)
   end
 end
