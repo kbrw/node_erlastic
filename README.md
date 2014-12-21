@@ -5,7 +5,7 @@ Node library to make nodejs gen_server in Erlang/Elixir through Port connection.
 
 This module allows you to :
 - decode and encode between Binary Erlang Term and javascript types
-- create a simple Erlang port interface through an event emitter
+- create a simple Erlang port interface through a nodeJS *Readable* and *Writable* (Duplex)
 - create a "`gen_server` style" handler to manage your port
 
 ## Example Usage
@@ -99,9 +99,10 @@ containing the binary erlang term, converted using the following rules :
 
 Port provides you a Node Duplex stream in object mode which is both Readable
 and Writable : http://nodejs.org/api/stream.html#stream_class_stream_duplex_1
-You can communicate javascript object with an erlang through stdin/out with
-`port.read()` and `port.write(obj)`.  These objects are converted to erlang
-external binary format using the Bert encoder described above.
+Through this duplex, you can communicate javascript objects with an erlang node
+through stdin/out with `port.read()` and `port.write(obj)`.  These objects are
+converted to erlang external binary format using the Bert encoder described
+above.
 
 **Need `{packet,4}` `openport` option on the erlang side**
 
@@ -123,7 +124,7 @@ port = Port.open({:spawn,'node calculator.js'}, [:binary, packet: 4])
 send(port,{self,{:command,:erlang.term_to_binary( {:hello, 007} )}})
 {:hello, 007} = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end
 send(port,{self,{:command,:erlang.term_to_binary( [:foo, :bar]} )}})
-{:foo, :bar} = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end
+[:foo, :bar] = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end
 ```
 
 ## The Erlang style handler interface to the port event handler
@@ -133,7 +134,7 @@ port events in the same fashion as the erlang gen server handler.
 
 It takes as parameter a handler function taking `(req_term,from,state,done)` parameters.
 To "unlock" state and continue to read request mailbox (equivalent of the
-return of the erlang `gen_server handle_*` function), you need to call 
+return of the erlang `gen_server handle_*` function), you need to call `done`.
 
 ```javascript
 done("noreply",newstate); 
