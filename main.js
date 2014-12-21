@@ -36,13 +36,13 @@ function log(mes){
   process.stderr.write((new Date()).toString().substring(4,24) + " " + mes + "\n");
 }
 
-function server(handler){
+function server(handler,init){
   var state,state_lock = false;
   port.on('readable', function next_term(){
     if(!state_lock && null !== (term = port.read())){
       state_lock = true;
       if(state === undefined) {
-        state = term; // first term is initial state
+        state = (init) ? init(term) : term; // first term is initial state
         state_lock = false;
         next_term();
       }
