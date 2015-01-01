@@ -94,6 +94,8 @@ containing the binary erlang term, converted using the following rules :
 - js null and undefined are
   - `nil` atom if `Bert.convention == Bert.ELIXIR`
   - `undefined` atom if `Bert.convention == Bert.ERLANG`
+  - if `Bert.decode_undefined_values == false`, then `nil` and `undefined` are
+    decoded into atom instead of null
 
 ## The Port Duplex
 

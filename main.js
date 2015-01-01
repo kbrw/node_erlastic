@@ -3,6 +3,7 @@ var bert = require('./bert.js'),
     util = require('util'),
     stdin = process.stdin, stdout = process.stdout,
     term_len = undefined;
+bert.decode_undefined_values = false;
 
 util.inherits(Port, Duplex);
 
@@ -37,12 +38,13 @@ function log(mes){
 }
 
 function server(handler,init){
-  var state,state_lock = false;
+  var state,first=true, state_lock = false;
   port.on('readable', function next_term(){
     if(!state_lock && null !== (term = port.read())){
       state_lock = true;
-      if(state === undefined) {
+      if(first) {
         state = (init) ? init(term) : term; // first term is initial state
+        first = false;
         state_lock = false;
         next_term();
       }

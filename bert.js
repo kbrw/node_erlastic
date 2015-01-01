@@ -31,6 +31,7 @@ function BertClass() {
 
     this.all_binaries_as_string = false;
     this.map_key_as_atom = true;
+    this.decode_undefined_values = true;
     this.convention = this.ELIXIR;
 }
 
@@ -316,10 +317,10 @@ BertClass.prototype.decode_atom = function (buffer, Count) {
 	else if (Value === "false") {
 		Value = false;
 	}
-	else if (this.convention === this.ELIXIR && Value === "nil") {
+	else if (this.decode_undefined_values && this.convention === this.ELIXIR && Value === "nil") {
 		Value = null;
 	}
-	else if (this.convention === this.ERLANG && Value === "undefined") {
+	else if (this.decode_undefined_values && this.convention === this.ERLANG && Value === "undefined") {
 		Value = null;
 	}
     else{
