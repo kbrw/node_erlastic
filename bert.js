@@ -322,8 +322,11 @@ BertClass.prototype.decode_atom = function (buffer, Count) {
 	else if (this.convention === this.ERLANG && Value === "undefined") {
 		Value = null;
 	}
+    else{
+        Value = this.atom(Value);
+    }
 	return {
-		value: this.atom(Value),
+		value: Value,
 		rest:  buffer.slice(Size)
 	};
 };
