@@ -4,6 +4,7 @@ var bert = require('./bert.js'),
     stdin = process.stdin, stdout = process.stdout,
     term_len = undefined;
 bert.decode_undefined_values = false;
+module.exports.buffer_len = log;
 
 util.inherits(Port, Duplex);
 
@@ -26,7 +27,7 @@ function read_term() {
 }
 
 Port.prototype._write = function(obj, encoding, callback){
-  var term = bert.encode(obj);
+  var term = bert.encode(obj,true);
   var len = new Buffer(4); len.writeUInt32BE(term.length,0);
   stdout.write(len);
   stdout.write(term,callback);

@@ -66,9 +66,9 @@ Bert.convention = Bert.ELIXIR;
 Bert.all_binaries_as_string = true;
 
 Bert.encode({foo: "bar", k2: 4});
-Bert.encode(very_big_obj,1000000); 
-// optional 2nd parameter is output buffer size, default is 300kbytes
-// if too small then the result will be incomplete
+Bert.encode({foo: "bar", k2: 4},true);
+// with ",true", the result is not copied, the return buffer point always to
+// the same allocated memory
 Bert.decode(mybuffer);
 ```
 

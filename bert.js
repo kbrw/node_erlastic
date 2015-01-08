@@ -33,6 +33,9 @@ function BertClass() {
     this.map_key_as_atom = true;
     this.decode_undefined_values = true;
     this.convention = this.ELIXIR;
+
+    this.output_buffer = new Buffer(10000000);
+    this.output_buffer[0] = this.BERT_START;
 }
 
 function BertAtom(Obj) {
@@ -66,13 +69,19 @@ function BertTuple(Arr) {
 
 
 // - INTERFACE -
-
-BertClass.prototype.encode = function (Obj, buffer_len) {
-    if (buffer_len === undefined) var buffer_len = 300000;
-    var buffer = new Buffer(buffer_len);
-    buffer[0] = this.BERT_START;
-    var tail_buffer = this.encode_inner(Obj,buffer.slice(1));
-	return buffer.slice(0,buffer.length - tail_buffer.length);
+BertClass.prototype.encode = function (Obj,nocopy) {
+    if (nocopy === undefined) var nocopy = false;
+    var tail_buffer = this.encode_inner(Obj,this.output_buffer.slice(1));
+    if(tail_buffer.length == 0){
+        throw new Error("Bert encode a too big term, encoding buffer overflow");
+    }
+    if(!nocopy){
+       res = new Buffer(this.output_buffer.length - tail_buffer.length);
+       this.output_buffer.copy(res,0,0,res.length);
+       return res; 
+    }else{
+	  return this.output_buffer.slice(0,this.output_buffer.length - tail_buffer.length);
+    }
 };
 
 BertClass.prototype.decode = function (buffer) {
