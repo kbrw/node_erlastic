@@ -26,11 +26,13 @@ function read_term() {
   }
 }
 
+var stdout_write = process.stdout.write
+process.stdout.write = process.stderr.write
 Port.prototype._write = function(obj, encoding, callback){
   var term = bert.encode(obj,true);
   var len = new Buffer(4); len.writeUInt32BE(term.length,0);
-  stdout.write(len);
-  stdout.write(term,callback);
+  stdout_write(len);
+  stdout_write(term,callback);
 }
 
 function log(mes){
