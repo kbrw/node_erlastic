@@ -150,7 +150,7 @@ BertClass.prototype.encode_number = function (Obj, buffer) {
 	// 4 byte int...
 	if (isInteger && Obj >= -134217728 && Obj <= 134217727) {
         buffer[0] = this.INTEGER;
-        buffer.writeInt32(Obj, 1);
+        buffer.writeInt32BE(Obj, 1);
         return buffer.slice(5);
 	}
 
