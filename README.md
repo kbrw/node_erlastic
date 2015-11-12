@@ -28,7 +28,7 @@ GenServer.start_link(Exos.Proc,{"node calculator.js",0,cd: "/path/to/proj"}, nam
 GenServer.cast Calculator, {:add, 2}
 GenServer.cast Calculator, {:add, 3}
 GenServer.cast Calculator, {:rem, 1}
-4 = GenServer.get Calculator, :get
+4 = GenServer.call Calculator, :get
 
 defmodule Exos.Proc do
   use GenServer
