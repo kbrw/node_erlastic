@@ -47,4 +47,9 @@ defmodule PortTest do
     GenServer.cast Calculator, {:rem, 6}
     assert 3 = GenServer.call(Calculator,:get)
   end
+
+  test "calculator throw should error" do
+    {:error, {:user, 0, "Error", "throwing error", stack}} = GenServer.call Calculator, :throw
+    assert stack
+  end
 end
