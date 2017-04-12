@@ -60,6 +60,9 @@ function server(handler,init){
           if ((type === "reply" && arg2 !== undefined) || (type === "noreply" && arg1 !== undefined)) {
             state = (arg2 === undefined) ? arg1 : arg2;
           }
+          if (type === 'error') {
+            port.write(bert.tuple(bert.atom('error'), bert.tuple(bert.atom(arg1.type||'user'), (arg1.code || 0), arg1.name, arg1.message, [arg1.stack])));
+          }
           state_lock = false;
           next_term();
         });
