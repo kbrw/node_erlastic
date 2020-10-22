@@ -34,7 +34,7 @@ function BertClass() {
     this.decode_undefined_values = true;
     this.convention = this.ELIXIR;
 
-    this.output_buffer = new Buffer(10000000);
+    this.output_buffer = Buffer.allocUnsafe(10000000);
     this.output_buffer[0] = this.BERT_START;
 }
 
@@ -76,7 +76,7 @@ BertClass.prototype.encode = function (Obj,nocopy) {
         throw new Error("Bert encode a too big term, encoding buffer overflow");
     }
     if(!nocopy){
-       res = new Buffer(this.output_buffer.length - tail_buffer.length);
+       res = Buffer.allocUnsafe(this.output_buffer.length - tail_buffer.length);
        this.output_buffer.copy(res,0,0,res.length);
        return res; 
     }else{
@@ -114,7 +114,7 @@ BertClass.prototype.encode_inner = function (Obj, buffer) {
 
 BertClass.prototype.encode_string = function (Obj, buffer) {
     if (this.convention === this.ELIXIR){
-        return this.encode_binary(new Buffer(Obj), buffer);
+        return this.encode_binary(Buffer.from(Obj), buffer);
     } else {
 	    buffer[0] = this.STRING;
         buffer.writeUInt16BE(Obj.length,1);
@@ -155,7 +155,7 @@ BertClass.prototype.encode_number = function (Obj, buffer) {
 	}
 
 	// Bignum...
-    var num_buffer = new Buffer(buffer.length);
+    var num_buffer = Buffer.allocUnsafe(buffer.length);
 	if (Obj < 0) {
 		Obj *= -1;
         num_buffer[0] = 1;
@@ -348,7 +348,7 @@ BertClass.prototype.decode_atom = function (buffer, Count) {
 BertClass.prototype.decode_binary = function (buffer) {
 	var Size = this.bytes_to_int(buffer, 4);
 	buffer = buffer.slice(4);
-    var bin = new Buffer(Size);
+    var bin = Buffer.allocUnsafe(Size);
     buffer.copy(bin,0,0,Size);
 	return {
         value: (this.convention === this.ELIXIR && this.all_binaries_as_string) ? bin.toString() : bin,
