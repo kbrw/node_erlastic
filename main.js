@@ -30,7 +30,13 @@ var stdout_write = process.stdout.write
 var fake_write = function(){}
 process.stdout.write = fake_write
 Port.prototype._write = function(obj, encoding, callback){
-  var term = bert.encode(obj,true);
+  var term;
+  try {
+   term = bert.encode(obj,true);
+  } catch (error) {
+    log(error.toString());
+    process.exit(1);
+  }
   var len = Buffer.alloc(4); len.writeUInt32BE(term.length,0);
   process.stdout.write = stdout_write
   process.stdout.write(len);
