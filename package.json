@@ -1,6 +1,6 @@
 {
   "name": "node_erlastic",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Interface to make node-erlang communication, integrate a nodejs gen_server into your erlang application",
   "main": "main.js",
   "scripts": {
