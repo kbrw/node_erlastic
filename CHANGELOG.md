@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. (Hopefully I won't forget much.)
+All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 

@@ -15,7 +15,7 @@ manager server, where you can add or remove an amount in the
 account and get it :
 
 ```javascript
-require('node_erlastic').server(function(term,from,current_amount,done){
+require('@kbrw/node_erlastic').server(function(term,from,current_amount,done){
   if (term == "get") return done("reply",current_amount);
   if (term[0] == "add") return done("noreply",current_amount+term[1]);
   if (term[0] == "rem") return done("noreply",current_amount-term[1]);
@@ -60,7 +60,7 @@ end
 ## External Term Format codec (BERT)
 
 ```javascript
-var Bert = require('node_erlastic/bert');
+var Bert = require('@kbrw/node_erlastic/bert');
 // you can configure `convention`, `all_binaries_as_string` , `map_key_as_atom`, see below
 Bert.convention = Bert.ELIXIR;
 Bert.all_binaries_as_string = true;
@@ -112,7 +112,7 @@ Below a simple "echo" server using this abstraction, read nodejs
 "readable" documentation to understand it :
 
 ```javascript
-var port = require('node_erlastic').port;
+var port = require('@kbrw/node_erlastic').port;
 port.on('readable', function echo(){
   if(null !== (term = port.read())){
     port.write(term);
@@ -166,6 +166,6 @@ provides a convenient `log` function allowing you to log something from your
 node server.
 
 ```javascript
-  var log = require("node_erlastic").log;
+  var log = require("@kbrw/node_erlastic").log;
   log("your log");
 ```
