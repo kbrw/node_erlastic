@@ -169,3 +169,12 @@ node server.
   var log = require("@kbrw/node_erlastic").log;
   log("your log");
 ```
+### Warning
+
+ Do not ever use `console.log` because the erlang code reads stdout and will give timeout errors:
+ ```erlang
+    res = receive do {^port,{:data,b}}->:erlang.binary_to_term(b) end 
+ ```
+ In Javascript, the stdout call is buffered, see this:
+ https://stackoverflow.com/questions/12510835/stdout-flush-for-nodejs
+
